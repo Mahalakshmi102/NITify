@@ -68,36 +68,29 @@ exports.loginUser = async (req, res) => {
       }
     };
 
-    // Sign token
+    // Sign token synchronously to avoid unhandled async rejection crashes
     const jwtSecret = process.env.JWT_SECRET || 'fallback_secret_key';
-    jwt.sign(
-      payload,
-      jwtSecret,
-      { expiresIn: '1d' },
-      async (err, token) => {
-        if (err) throw err;
-        
-        user.lastLogin = new Date();
-        await user.save();
+    const token = jwt.sign(payload, jwtSecret, { expiresIn: '1d' });
 
-        res.json({
-          token,
-          user: {
-            id: user._id,
-            name: user.name,
-            email: user.email,
-            role: user.role,
-            department: user.department,
-            year: user.year,
-            semester: user.semester,
-            section: user.section,
-            isFirstLogin: user.isFirstLogin,
-            permissions: user.permissions || [],
-            classAdvisorDetails: user.classAdvisorDetails || { isClassAdvisor: false }
-          }
-        });
+    // Use updateOne to minimize database write latency and avoid full document validation/hooks overhead
+    await User.updateOne({ _id: user._id }, { $set: { lastLogin: new Date() } });
+
+    res.json({
+      token,
+      user: {
+        id: user._id,
+        name: user.name,
+        email: user.email,
+        role: user.role,
+        department: user.department,
+        year: user.year,
+        semester: user.semester,
+        section: user.section,
+        isFirstLogin: user.isFirstLogin,
+        permissions: user.permissions || [],
+        classAdvisorDetails: user.classAdvisorDetails || { isClassAdvisor: false }
       }
-    );
+    });
   } catch (error) {
     console.error('Login error:', error);
     res.status(500).json({ message: 'Server error' });
@@ -266,28 +259,28 @@ exports.parentLogin = async (req, res) => {
       }
     };
 
+    // Sign token synchronously to avoid unhandled async rejection crashes
     const jwtSecret = process.env.JWT_SECRET || 'fallback_secret_key';
-    jwt.sign(payload, jwtSecret, { expiresIn: '1d' }, (err, token) => {
-      if (err) throw err;
-      res.json({
-        token,
-        user: {
-          id: student._id,
-          name: student.parentDetails?.name || `Parent of ${student.name}`,
-          role: 'Parent',
-          studentId: student._id,
-          linkedStudent: {
-            name: student.name,
-            registerNumber: student.registerNumber,
-            rollNumber: student.rollNumber,
-            department: student.department,
-            year: student.year,
-            semester: student.semester,
-            section: student.section
-          },
-          isFirstLogin: false
-        }
-      });
+    const token = jwt.sign(payload, jwtSecret, { expiresIn: '1d' });
+
+    res.json({
+      token,
+      user: {
+        id: student._id,
+        name: student.parentDetails?.name || `Parent of ${student.name}`,
+        role: 'Parent',
+        studentId: student._id,
+        linkedStudent: {
+          name: student.name,
+          registerNumber: student.registerNumber,
+          rollNumber: student.rollNumber,
+          department: student.department,
+          year: student.year,
+          semester: student.semester,
+          section: student.section
+        },
+        isFirstLogin: false
+      }
     });
   } catch (error) {
     console.error('Parent login error:', error);

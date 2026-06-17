@@ -21,10 +21,10 @@ app.use(cors({
 }));
 app.use(express.json());
 
-// Rate Limiting Config
+// Rate Limiting Config (optimized for concurrency)
 const authLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 100, // Limit each IP to 100 requests per windowMs
+  max: 2000, // Increased to support 300+ simultaneous logins from the same NAT/IP
   message: { message: 'Too many authentication attempts from this IP, please try again after 15 minutes' },
   standardHeaders: true,
   legacyHeaders: false,
@@ -32,7 +32,7 @@ const authLimiter = rateLimit({
 
 const apiLimiter = rateLimit({
   windowMs: 5 * 60 * 1000, // 5 minutes
-  max: 500, // Limit each IP to 500 requests per windowMs
+  max: 10000, // Increased to support simultaneous dashboard loading
   message: { message: 'Too many requests from this IP, please try again later' },
   standardHeaders: true,
   legacyHeaders: false,
@@ -93,7 +93,7 @@ const os = require('os');
 
 // Background Jobs (only running on master process or if CLUSTER_MODE is disabled, controlled by RUN_CRON_JOBS env)
 const runCronJobs = process.env.RUN_CRON_JOBS === 'true';
-const clusterMode = process.env.CLUSTER_MODE === 'true';
+const clusterMode = process.env.CLUSTER_MODE !== 'false'; // Default to true unless explicitly set to 'false'
 
 const startServer = () => {
   app.listen(PORT, () => {

@@ -35,6 +35,7 @@ const userSchema = new mongoose.Schema({
   batch: { type: String },
   registerNumber: {
     type: String,
+    index: true,
   },
   rollNumber: { type: String },
   employeeId: { type: String },
