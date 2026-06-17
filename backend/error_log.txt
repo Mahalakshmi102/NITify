@@ -1,0 +1,10 @@
+2026-06-16T08:26:34.084Z\nMongoServerError: E11000 duplicate key error collection: smartattendence.users index: email_1 dup key: { email: "721025205026@nit.edu" }
+    at InsertOneOperation.handleOk (C:\Users\maha5\Downloads\atten\atten\attendance-system-main\backend\node_modules\mongodb\lib\operations\insert.js:51:19)
+    at executeOperationWithRetries (C:\Users\maha5\Downloads\atten\atten\attendance-system-main\backend\node_modules\mongodb\lib\operations\execute_operation.js:194:34)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async executeOperation (C:\Users\maha5\Downloads\atten\atten\attendance-system-main\backend\node_modules\mongodb\lib\operations\execute_operation.js:83:16)
+    at async Collection.insertOne (C:\Users\maha5\Downloads\atten\atten\attendance-system-main\backend\node_modules\mongodb\lib\collection.js:154:16)
+    at async model.$__save (C:\Users\maha5\Downloads\atten\atten\attendance-system-main\backend\node_modules\mongoose\lib\model.js:428:16)
+    at async model.save (C:\Users\maha5\Downloads\atten\atten\attendance-system-main\backend\node_modules\mongoose\lib\model.js:667:5)
+    at async model.create (C:\Users\maha5\Downloads\atten\atten\attendance-system-main\backend\node_modules\mongoose\lib\model.js:2747:5)
+    at async exports.handleBulkUpload (C:\Users\maha5\Downloads\atten\atten\attendance-system-main\backend\controllers\adminController.js:1997:13)\n\n
