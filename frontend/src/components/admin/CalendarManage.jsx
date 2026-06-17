@@ -8,6 +8,7 @@ export default function CalendarManage() {
   const [events, setEvents] = useState([]);
   const [form, setForm] = useState({ date: '', type: 'Working Day', description: '', term: '' });
   const [editingId, setEditingId] = useState(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
   const [importLoading, setImportLoading] = useState(false);
   const [importMessage, setImportMessage] = useState('');
   const [selectedIds, setSelectedIds] = useState([]);
@@ -29,6 +30,12 @@ export default function CalendarManage() {
     }
   };
 
+  const openAddModal = () => {
+    setEditingId(null);
+    setForm({ date: '', type: 'Working Day', description: '', term: '' });
+    setIsModalOpen(true);
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
@@ -39,6 +46,7 @@ export default function CalendarManage() {
         await addCalendarEvent(form);
       }
       setForm({ date: '', type: 'Working Day', description: '', term: '' });
+      setIsModalOpen(false);
       fetchEvents();
     } catch (err) {
       alert(editingId ? 'Error updating calendar event' : 'Error adding calendar event');
@@ -54,7 +62,7 @@ export default function CalendarManage() {
       description: event.description || '',
       term: event.term || ''
     });
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    setIsModalOpen(true);
   };
 
   const handleDelete = async (event) => {
@@ -145,32 +153,86 @@ export default function CalendarManage() {
       
       <BulkUpload type="calendar" onUploadSuccess={fetchEvents} />
 
-      <form onSubmit={handleSubmit} className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 mb-8 grid grid-cols-1 md:grid-cols-4 gap-4">
-        <input required type="date" value={form.date} onChange={e => setForm({...form, date: e.target.value})} className="border p-2 rounded" />
-        <select required value={form.type} onChange={e => setForm({...form, type: e.target.value})} className="border p-2 rounded">
-          <option>Working Day</option>
-          <option>Holiday</option>
-          <option>Exam</option>
-        </select>
-        <input required placeholder="Description (e.g., Diwali, Midterms)" value={form.description} onChange={e => setForm({...form, description: e.target.value})} className="border p-2 rounded md:col-span-2" />
-        <div className="md:col-span-4 flex gap-2">
-          <button type="submit" className="flex-grow bg-orange-600 text-white p-2 rounded hover:bg-orange-700 transition font-medium">
-            {editingId ? 'Update Event' : 'Add Event'}
-          </button>
-          {editingId && (
-            <button 
-              type="button" 
-              onClick={() => {
-                setEditingId(null);
-                setForm({ date: '', type: 'Working Day', description: '', term: '' });
-              }} 
-              className="bg-slate-200 text-slate-700 p-2 rounded hover:bg-slate-350 transition font-medium px-6"
-            >
-              Cancel
-            </button>
-          )}
+      {/* Modal popup for Add/Edit Event */}
+      {isModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4 overflow-y-auto animate-in fade-in duration-200">
+          <div className="bg-white rounded-2xl w-full max-w-md shadow-2xl overflow-hidden my-auto animate-in zoom-in-95 duration-200">
+            <div className="bg-slate-50 border-b border-slate-100 p-6 flex justify-between items-center">
+              <div>
+                <h3 className="text-xl font-extrabold text-slate-800">{editingId ? 'Edit Event' : 'Add New Event'}</h3>
+                <p className="text-xs text-slate-500 font-medium mt-1">Specify academic calendar date and type details.</p>
+              </div>
+              <button 
+                type="button"
+                onClick={() => {
+                  setIsModalOpen(false);
+                  setEditingId(null);
+                }} 
+                className="p-2 bg-white rounded-lg border border-slate-200 text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <form onSubmit={handleSubmit} className="p-6 space-y-4">
+              <div>
+                <label className="block text-sm font-bold text-slate-700 mb-1">Date</label>
+                <input 
+                  required 
+                  type="date" 
+                  value={form.date} 
+                  onChange={e => setForm({...form, date: e.target.value})} 
+                  className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-orange-500 outline-none" 
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-bold text-slate-700 mb-1">Event Type</label>
+                <select 
+                  required 
+                  value={form.type} 
+                  onChange={e => setForm({...form, type: e.target.value})} 
+                  className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-orange-500 outline-none"
+                >
+                  <option>Working Day</option>
+                  <option>Holiday</option>
+                  <option>Exam</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-sm font-bold text-slate-700 mb-1">Description</label>
+                <input 
+                  required 
+                  placeholder="e.g. Diwali, Midterm Exams, Sports Day" 
+                  value={form.description} 
+                  onChange={e => setForm({...form, description: e.target.value})} 
+                  className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-orange-500 outline-none" 
+                />
+              </div>
+
+              <div className="pt-4 flex justify-end gap-3 border-t border-slate-100">
+                <button 
+                  type="button" 
+                  onClick={() => {
+                    setIsModalOpen(false);
+                    setEditingId(null);
+                  }} 
+                  className="px-5 py-2.5 rounded-xl font-bold text-slate-600 bg-slate-100 hover:bg-slate-200 transition text-sm"
+                >
+                  Cancel
+                </button>
+                <button 
+                  type="submit" 
+                  className="px-5 py-2.5 rounded-xl font-bold text-white bg-orange-600 hover:bg-orange-700 transition text-sm"
+                >
+                  {editingId ? 'Update Event' : 'Add Event'}
+                </button>
+              </div>
+            </form>
+          </div>
         </div>
-      </form>
+      )}
 
       <div className="bg-white p-4 md:p-6 rounded-2xl shadow-[0_4px_24px_-4px_rgba(0,0,0,0.05)] border border-slate-100 mb-8">
         <h3 className="text-base md:text-lg font-bold text-slate-800 flex items-center gap-2 mb-2">
@@ -226,14 +288,22 @@ export default function CalendarManage() {
 
       <div className="flex justify-between items-center mb-4">
         <h3 className="text-xl font-bold text-slate-800">Calendar Events</h3>
-        {selectedIds.length > 0 && (
+        <div className="flex gap-2">
+          {selectedIds.length > 0 && (
+            <button 
+              onClick={handleDeleteSelected}
+              className="bg-red-600 hover:bg-red-700 text-white font-bold px-4 py-2 rounded-lg transition text-xs shadow-md shadow-red-500/20"
+            >
+              Delete Selected ({selectedIds.length})
+            </button>
+          )}
           <button 
-            onClick={handleDeleteSelected}
-            className="bg-red-600 hover:bg-red-700 text-white font-bold px-4 py-2 rounded-lg transition text-xs shadow-md shadow-red-500/20"
+            onClick={openAddModal}
+            className="bg-orange-600 hover:bg-orange-700 text-white font-bold px-4 py-2 rounded-lg transition text-xs shadow-md shadow-orange-500/20"
           >
-            Delete Selected ({selectedIds.length})
+            Add Event
           </button>
-        )}
+        </div>
       </div>
 
       <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-x-auto">
