@@ -926,133 +926,35 @@ export default function AnalyticsDashboard({ departmentOnly, setActiveTab }) {
         </div>
       </div>
 
-      {/* Section 8 & Section 10: Timetable Management Today & Attendance Heat Map */}
-      {!departmentOnly ? (
-        <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
-          {/* Section 8: Today's Timeline Schedule */}
-          <div className="xl:col-span-2 bg-white p-6 rounded-2xl border border-slate-100 shadow-[0_4px_24px_rgba(0,0,0,0.01)] flex flex-col justify-between">
-            <div>
-              <h3 className="font-extrabold text-slate-800 text-sm flex items-center gap-2 mb-4 pb-4 border-b border-slate-50">
-                <Clock className="w-4 h-4 text-indigo-500" />
-                Today's Campus Timetable Schedule
-              </h3>
-
-              {/* Year Filters for Timetable */}
-              {departmentOnly && (
-                <div className="flex flex-wrap gap-1.5 mb-4 border-b border-slate-50 pb-4">
-                  {['All', '1', '2', '3', '4'].map(yr => (
-                    <button
-                      key={yr}
-                      onClick={() => setTimetableYearFilter(yr)}
-                      className={`px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-wider transition-all cursor-pointer ${
-                        timetableYearFilter === yr 
-                          ? 'bg-indigo-600 text-white shadow-sm shadow-indigo-100' 
-                          : 'bg-slate-50 text-slate-500 hover:bg-slate-100 hover:text-slate-800'
-                      }`}
-                    >
-                      {yr === 'All' ? 'All Years' : `Year ${yr}`}
-                    </button>
-                  ))}
+      {/* Section 10: Attendance Heat Map */}
+      <div className="bg-white p-6 rounded-2xl border border-slate-100 shadow-[0_4px_24px_rgba(0,0,0,0.01)] mb-6">
+        <div>
+          <h3 className="font-extrabold text-slate-800 text-sm flex items-center gap-2 mb-3">
+            <GraduationCap className="w-4 h-4 text-purple-500" />
+            Class Attendance Heat Map
+          </h3>
+          <p className="text-[11px] text-slate-400 font-bold mb-4">Color representation of class performance overall</p>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 max-h-[300px] overflow-y-auto custom-scrollbar pr-1">
+            {classHeatmap?.map((item, idx) => (
+              <div key={idx} className="space-y-1.5 p-4 bg-slate-50/50 rounded-2xl border border-slate-100">
+                <div className="flex justify-between text-xs font-bold">
+                  <span className="text-slate-700">{item.className}</span>
+                  <span className={item.percentage < 75 ? 'text-rose-600 font-black' : 'text-slate-650'}>{item.percentage}%</span>
                 </div>
-              )}
-              
-              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 max-h-[300px] overflow-y-auto custom-scrollbar p-1">
-                {filteredTimetableClasses.map((slot, idx) => (
-                  <div key={idx} className={`p-4 rounded-xl border flex flex-col justify-between min-h-[120px] transition ${
-                    slot.status === 'In Progress' ? 'bg-indigo-50/50 border-indigo-200 ring-2 ring-indigo-500/10' :
-                    slot.status === 'Submitted' ? 'bg-emerald-50/30 border-emerald-100' :
-                    slot.status === 'Missing' ? 'bg-rose-50/30 border-rose-100' :
-                    'bg-slate-50/30 border-slate-200/60'
-                  }`}>
-                    <div className="flex justify-between items-start">
-                      <span className="text-[10px] font-black text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded uppercase tracking-wider">{slot.period}</span>
-                      <span className={`w-2.5 h-2.5 rounded-full ${
-                        slot.status === 'Submitted' ? 'bg-emerald-500' :
-                        slot.status === 'In Progress' ? 'bg-blue-500 animate-ping' :
-                        slot.status === 'Missing' ? 'bg-rose-500' :
-                        'bg-slate-400'
-                      }`}></span>
-                    </div>
-                    <div className="my-2">
-                      <p className="text-xs font-black text-slate-800 truncate">{slot.subject}</p>
-                      <p className="text-[10px] text-slate-400 font-bold mt-0.5 truncate">{slot.class} | {slot.faculty}</p>
-                    </div>
-                    <div className="flex justify-between items-center text-[9px] font-bold text-slate-400 pt-2 border-t border-slate-100/50">
-                      <span>{slot.startTime} - {slot.endTime}</span>
-                      <span className="uppercase text-slate-600">{slot.status}</span>
-                    </div>
-                  </div>
-                ))}
-                {filteredTimetableClasses.length === 0 && (
-                  <div className="col-span-full py-8 text-center text-slate-400 italic">No classes scheduled for today.</div>
-                )}
+                <div className="h-2 w-full bg-slate-100 rounded-full overflow-hidden">
+                  <div className={`h-full rounded-full transition-all duration-500 ${
+                    item.percentage < 75 ? 'bg-rose-500' : 'bg-indigo-500'
+                  }`} style={{ width: `${item.percentage}%` }}></div>
+                </div>
               </div>
-            </div>
-          </div>
-
-          {/* Section 10: Attendance Heat Map */}
-          <div className="bg-white p-6 rounded-2xl border border-slate-100 shadow-[0_4px_24px_rgba(0,0,0,0.01)] flex flex-col justify-between">
-            <div>
-              <h3 className="font-extrabold text-slate-800 text-sm flex items-center gap-2 mb-3">
-                <GraduationCap className="w-4 h-4 text-purple-500" />
-                Class Attendance Heat Map
-              </h3>
-              <p className="text-[11px] text-slate-400 font-bold mb-4">Color representation of class performance overall</p>
-              
-              <div className="space-y-3.5 max-h-[300px] overflow-y-auto custom-scrollbar pr-1">
-                {classHeatmap?.map((item, idx) => (
-                  <div key={idx} className="space-y-1">
-                    <div className="flex justify-between text-xs font-bold">
-                      <span className="text-slate-700">{item.className}</span>
-                      <span className={item.percentage < 75 ? 'text-rose-600 font-black' : 'text-slate-600'}>{item.percentage}%</span>
-                    </div>
-                    <div className="h-2 w-full bg-slate-100 rounded-full overflow-hidden">
-                      <div className={`h-full rounded-full transition-all ${
-                        item.percentage < 75 ? 'bg-rose-500' : 'bg-indigo-500'
-                      }`} style={{ width: `${item.percentage}%` }}></div>
-                    </div>
-                  </div>
-                ))}
-                {(!classHeatmap || classHeatmap.length === 0) && (
-                  <p className="text-center text-xs text-slate-400 italic">No class performance records compiled.</p>
-                )}
-              </div>
-            </div>
+            ))}
+            {(!classHeatmap || classHeatmap.length === 0) && (
+              <p className="col-span-full text-center text-slate-400 italic py-6">No class performance records compiled.</p>
+            )}
           </div>
         </div>
-      ) : (
-        <div className="grid grid-cols-1 gap-6">
-          {/* Section 10: Attendance Heat Map */}
-          <div className="bg-white p-6 rounded-2xl border border-slate-100 shadow-[0_4px_24px_rgba(0,0,0,0.01)] flex flex-col justify-between">
-            <div>
-              <h3 className="font-extrabold text-slate-800 text-sm flex items-center gap-2 mb-3">
-                <GraduationCap className="w-4 h-4 text-purple-500" />
-                Class Attendance Heat Map
-              </h3>
-              <p className="text-[11px] text-slate-400 font-bold mb-4">Color representation of class performance overall</p>
-              
-              <div className="space-y-3.5 max-h-[300px] overflow-y-auto custom-scrollbar pr-1">
-                {classHeatmap?.map((item, idx) => (
-                  <div key={idx} className="space-y-1">
-                    <div className="flex justify-between text-xs font-bold">
-                      <span className="text-slate-700">{item.className}</span>
-                      <span className={item.percentage < 75 ? 'text-rose-600 font-black' : 'text-slate-600'}>{item.percentage}%</span>
-                    </div>
-                    <div className="h-2 w-full bg-slate-100 rounded-full overflow-hidden">
-                      <div className={`h-full rounded-full transition-all ${
-                        item.percentage < 75 ? 'bg-rose-500' : 'bg-indigo-500'
-                      }`} style={{ width: `${item.percentage}%` }}></div>
-                    </div>
-                  </div>
-                ))}
-                {(!classHeatmap || classHeatmap.length === 0) && (
-                  <p className="text-center text-xs text-slate-400 italic">No class performance records compiled.</p>
-                )}
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
+      </div>
 
       {/* Section 9: Student Management Quick Search & Profiler */}
       <div className="bg-white p-6 rounded-2xl border border-slate-100 shadow-[0_4px_24px_rgba(0,0,0,0.01)]">

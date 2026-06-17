@@ -1209,18 +1209,22 @@ exports.getAnalyticsOverview = async (req, res) => {
     const complianceData = [];
 
     for (const fac of allFaculty) {
-      const myTimetable = todaysTimetable.filter(t => t.faculty && t.faculty._id.toString() === fac._id.toString());
-      let assigned = myTimetable.length;
+      let assigned = 0;
       let submitted = 0;
       let missing = 0;
 
-      for (const slot of myTimetable) {
-        const session = todaysSessions.find(s => s.timetable && s.timetable._id.toString() === slot._id.toString());
-        if (session && session.locked) {
-          submitted++;
-        } else {
-          if (currentTime > slot.endTime) {
-            missing++;
+      if (todayIsWorking) {
+        const myTimetable = todaysTimetable.filter(t => t.faculty && t.faculty._id.toString() === fac._id.toString());
+        assigned = myTimetable.length;
+
+        for (const slot of myTimetable) {
+          const session = todaysSessions.find(s => s.timetable && s.timetable._id.toString() === slot._id.toString());
+          if (session && session.locked) {
+            submitted++;
+          } else {
+            if (currentTime > slot.endTime) {
+              missing++;
+            }
           }
         }
       }
@@ -1251,7 +1255,7 @@ exports.getAnalyticsOverview = async (req, res) => {
       uniqueBatches.forEach(b => {
         classHeatmapList.push({
           className: `${b._id.department} Y${b._id.year} ${b._id.section}`,
-          percentage: 100
+          percentage: 0
         });
       });
     }
@@ -1274,7 +1278,7 @@ exports.getAnalyticsOverview = async (req, res) => {
         });
         percentage = calculatePercentage(counts, policies);
       } else {
-        percentage = d === 'CSE' ? 86 : d === 'ECE' ? 82 : d === 'MECH' ? 80 : d === 'CIVIL' ? 88 : 85;
+        percentage = 0;
       }
       
       departmentWise.push({
@@ -1299,7 +1303,7 @@ exports.getAnalyticsOverview = async (req, res) => {
           });
           percentage = calculatePercentage(counts, policies);
         } else {
-          percentage = y === 1 ? 88 : y === 2 ? 84 : y === 3 ? 81 : 86;
+          percentage = 0;
         }
         yearWise.push({
           year: `Year ${y}`,
