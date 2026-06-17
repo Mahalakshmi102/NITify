@@ -105,7 +105,7 @@ const os = require('os');
 
 // Background Jobs (only running on master process or if CLUSTER_MODE is disabled, controlled by RUN_CRON_JOBS env)
 const runCronJobs = process.env.RUN_CRON_JOBS === 'true';
-const clusterMode = process.env.CLUSTER_MODE !== 'false'; // Default to true unless explicitly set to 'false'
+const clusterMode = process.env.CLUSTER_MODE === 'true'; // Default to false unless explicitly set to 'true'
 
 const startServer = () => {
   app.listen(PORT, () => {
