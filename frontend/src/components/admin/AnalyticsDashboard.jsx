@@ -366,211 +366,56 @@ export default function AnalyticsDashboard({ departmentOnly, setActiveTab }) {
         </div>
       </div>
 
-      {/* Section 2 & Section 3: Live Period Monitoring & Academic Calendar */}
-      {!departmentOnly ? (
-        <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
-          {/* Section 2: Live Period Monitoring */}
-          <div className="xl:col-span-2 bg-white p-6 rounded-2xl border border-slate-100 shadow-[0_4px_24px_rgba(0,0,0,0.01)] flex flex-col justify-between">
+      {/* Academic Calendar Monitor */}
+      <div className="bg-white p-6 rounded-2xl border border-slate-100 shadow-[0_4px_24px_rgba(0,0,0,0.01)] mb-6 animate-in fade-in duration-200">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          {/* Today status */}
+          <div className="space-y-4">
             <div>
-              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-4 pb-4 border-b border-slate-50">
-                <div>
-                  <h3 className="font-extrabold text-slate-800 text-sm flex items-center gap-2">
-                    <Clock className="w-4 h-4 text-indigo-500" />
-                    Live Period Monitoring
-                  </h3>
-                  <p className="text-[11px] text-slate-400 font-bold mt-0.5">Real-time status of current timetable slots</p>
-                </div>
-                <div className="flex items-center gap-3">
-                  <span className="bg-slate-100 text-slate-700 px-3 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1.5">
-                    <Clock className="w-3.5 h-3.5" />
-                    Time: {livePeriod?.currentTime || 'N/A'}
-                  </span>
-                  <span className="bg-indigo-50 text-indigo-700 px-3 py-1.5 rounded-lg text-xs font-extrabold border border-indigo-100">
-                    Hour: {livePeriod?.currentPeriod || 'N/A'}
-                  </span>
-                </div>
-              </div>
+              <h3 className="font-extrabold text-slate-800 text-sm flex items-center gap-2">
+                <Calendar className="w-4 h-4 text-pink-500" />
+                Academic Calendar Monitor
+              </h3>
+              <p className="text-[11px] text-slate-400 font-bold mt-0.5">Control state of campus operations</p>
+            </div>
 
-              {/* Filter */}
-              <div className="relative mb-4">
-                <Search className="absolute left-3 top-2.5 text-slate-400 w-4 h-4" />
-                <input 
-                  type="text" 
-                  placeholder="Filter by class, subject, or faculty..."
-                  value={periodFilter}
-                  onChange={e => setPeriodFilter(e.target.value)}
-                  className="w-full pl-9 pr-4 py-2 bg-slate-50/50 border border-slate-200 rounded-xl text-xs font-medium outline-none focus:border-indigo-500 transition"
-                />
+            <div className={`p-5 rounded-2xl border flex items-center justify-between ${
+              calendarMonitor?.todayIsWorking 
+                ? 'bg-emerald-50/50 border-emerald-100 text-emerald-800' 
+                : 'bg-rose-50 border-rose-100 text-rose-800'
+            }`}>
+              <div>
+                <p className="text-[10px] font-bold uppercase tracking-wider opacity-75">Today's Operation</p>
+                <p className="text-lg font-black mt-0.5">{calendarMonitor?.todayStatusText || 'Working Day'}</p>
               </div>
-
-              {/* Year Filters for HOD */}
-              {departmentOnly && (
-                <div className="flex flex-wrap gap-1.5 mb-4">
-                  {['All', '1', '2', '3', '4'].map(yr => (
-                    <button
-                      key={yr}
-                      onClick={() => setLivePeriodYearFilter(yr)}
-                      className={`px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-wider transition-all cursor-pointer ${
-                        livePeriodYearFilter === yr 
-                          ? 'bg-indigo-650 text-white shadow-sm shadow-indigo-100' 
-                          : 'bg-slate-50 text-slate-500 hover:bg-slate-100 hover:text-slate-800'
-                      }`}
-                    >
-                      {yr === 'All' ? 'All Years' : `Year ${yr}`}
-                    </button>
-                  ))}
-                </div>
+              {!calendarMonitor?.todayIsWorking && (
+                <span className="bg-rose-600 text-white font-extrabold text-[10px] px-2.5 py-1 rounded-md animate-pulse">
+                  Sessions Disabled
+                </span>
               )}
-
-              <div className="overflow-x-auto max-h-[300px] overflow-y-auto custom-scrollbar">
-                <table className="w-full text-left text-xs whitespace-nowrap">
-                  <thead className="bg-slate-50 text-slate-500 font-bold sticky top-0">
-                    <tr>
-                      <th className="p-3">Department</th>
-                      <th className="p-3">Class</th>
-                      <th className="p-3">Subject</th>
-                      <th className="p-3">Faculty</th>
-                      <th className="p-3 text-center">Status</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-slate-100">
-                    {filteredPeriodClasses.map((cls, i) => (
-                      <tr key={i} className="hover:bg-slate-50/50 transition">
-                        <td className="p-3 font-bold text-slate-600">{cls.department}</td>
-                        <td className="p-3 font-semibold text-slate-700">{cls.class}</td>
-                        <td className="p-3 font-semibold text-slate-800">{cls.subject}</td>
-                        <td className="p-3 text-slate-600">{cls.faculty}</td>
-                        <td className="p-3 text-center">
-                          <span className={`px-2.5 py-1 rounded-full text-[10px] font-extrabold uppercase border flex items-center justify-center gap-1 mx-auto max-w-[100px] ${
-                            cls.status === 'Submitted' ? 'bg-emerald-50 text-emerald-700 border-emerald-200' :
-                            cls.status === 'Pending' ? 'bg-amber-50 text-amber-700 border-amber-200' :
-                            cls.status === 'Missing' ? 'bg-rose-50 text-rose-700 border-rose-200' :
-                            cls.status === 'In Progress' ? 'bg-indigo-50 text-indigo-700 border-indigo-200 animate-pulse' :
-                            'bg-sky-50 text-sky-700 border-sky-200'
-                          }`}>
-                            <span className={`w-1.5 h-1.5 rounded-full ${
-                              cls.status === 'Submitted' ? 'bg-emerald-500' :
-                              cls.status === 'Pending' ? 'bg-amber-500' :
-                              cls.status === 'Missing' ? 'bg-rose-500' :
-                              'bg-indigo-500'
-                            }`}></span>
-                            {cls.status}
-                          </span>
-                        </td>
-                      </tr>
-                    ))}
-                    {filteredPeriodClasses.length === 0 && (
-                      <tr>
-                        <td colSpan="5" className="p-6 text-center text-slate-400 italic">No classes active in current period.</td>
-                      </tr>
-                    )}
-                  </tbody>
-                </table>
-              </div>
             </div>
           </div>
 
-          {/* Section 3: Academic Calendar Monitor */}
-          <div className="bg-white p-6 rounded-2xl border border-slate-100 shadow-[0_4px_24px_rgba(0,0,0,0.01)] flex flex-col justify-between">
-            <div className="space-y-4">
-              <div>
-                <h3 className="font-extrabold text-slate-800 text-sm flex items-center gap-2">
-                  <Calendar className="w-4 h-4 text-pink-500" />
-                  Academic Calendar Monitor
-                </h3>
-                <p className="text-[11px] text-slate-400 font-bold mt-0.5">Control state of campus operations</p>
-              </div>
-
-              {/* Today status */}
-              <div className={`p-4 rounded-2xl border flex items-center justify-between ${
-                calendarMonitor?.todayIsWorking 
-                  ? 'bg-emerald-50/50 border-emerald-100 text-emerald-800' 
-                  : 'bg-rose-50 border-rose-100 text-rose-800'
-              }`}>
-                <div>
-                  <p className="text-[10px] font-bold uppercase tracking-wider opacity-75">Today's Operation</p>
-                  <p className="text-lg font-black mt-0.5">{calendarMonitor?.todayStatusText || 'Working Day'}</p>
-                </div>
-                {!calendarMonitor?.todayIsWorking && (
-                  <span className="bg-rose-600 text-white font-extrabold text-[10px] px-2.5 py-1 rounded-md animate-pulse">
-                    Sessions Disabled
+          {/* Upcoming events list */}
+          <div className="md:col-span-2 space-y-3">
+            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1 px-1">Upcoming Events</p>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 max-h-[180px] overflow-y-auto custom-scrollbar">
+              {calendarMonitor?.upcomingEvents?.map((event, i) => (
+                <div key={i} className="flex justify-between items-center p-3 hover:bg-slate-50 rounded-2xl transition text-xs border border-slate-100/70 hover:border-slate-200">
+                  <span className="font-extrabold text-indigo-650 bg-indigo-50/80 px-2 py-1 rounded-lg">
+                    {new Date(event.date).toLocaleDateString('default', { month: 'short', day: 'numeric' })}
                   </span>
-                )}
-              </div>
-
-              {/* Upcoming events list */}
-              <div>
-                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2 px-1">Upcoming Events</p>
-                <div className="space-y-2 max-h-[180px] overflow-y-auto custom-scrollbar">
-                  {calendarMonitor?.upcomingEvents?.map((event, i) => (
-                    <div key={i} className="flex justify-between items-center p-2.5 hover:bg-slate-50 rounded-xl transition text-xs border border-transparent hover:border-slate-100">
-                      <span className="font-extrabold text-indigo-600 bg-indigo-50/80 px-2 py-1 rounded-lg">
-                        {new Date(event.date).toLocaleDateString('default', { month: 'short', day: 'numeric' })}
-                      </span>
-                      <span className="font-semibold text-slate-700 flex-1 ml-3 truncate">{event.description}</span>
-                      <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">{event.type}</span>
-                    </div>
-                  ))}
-                  {(!calendarMonitor?.upcomingEvents || calendarMonitor.upcomingEvents.length === 0) && (
-                    <p className="text-center text-xs text-slate-400 italic py-4">No upcoming events listed.</p>
-                  )}
+                  <span className="font-semibold text-slate-700 flex-1 ml-3 truncate">{event.description}</span>
+                  <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">{event.type}</span>
                 </div>
-              </div>
+              ))}
+              {(!calendarMonitor?.upcomingEvents || calendarMonitor.upcomingEvents.length === 0) && (
+                <p className="col-span-full text-center text-xs text-slate-400 italic py-6">No upcoming events listed.</p>
+              )}
             </div>
           </div>
         </div>
-      ) : (
-        <div className="grid grid-cols-1 gap-6">
-          {/* Section 3: Academic Calendar Monitor */}
-          <div className="bg-white p-6 rounded-2xl border border-slate-100 shadow-[0_4px_24px_rgba(0,0,0,0.01)] flex flex-col justify-between">
-            <div className="space-y-4">
-              <div>
-                <h3 className="font-extrabold text-slate-800 text-sm flex items-center gap-2">
-                  <Calendar className="w-4 h-4 text-pink-500" />
-                  Academic Calendar Monitor
-                </h3>
-                <p className="text-[11px] text-slate-400 font-bold mt-0.5">Control state of campus operations</p>
-              </div>
-
-              {/* Today status */}
-              <div className={`p-4 rounded-2xl border flex items-center justify-between ${
-                calendarMonitor?.todayIsWorking 
-                  ? 'bg-emerald-50/50 border-emerald-100 text-emerald-850' 
-                  : 'bg-rose-50 border-rose-100 text-rose-800'
-              }`}>
-                <div>
-                  <p className="text-[10px] font-bold uppercase tracking-wider opacity-75">Today's Operation</p>
-                  <p className="text-lg font-black mt-0.5">{calendarMonitor?.todayStatusText || 'Working Day'}</p>
-                </div>
-                {!calendarMonitor?.todayIsWorking && (
-                  <span className="bg-rose-600 text-white font-extrabold text-[10px] px-2.5 py-1 rounded-md animate-pulse">
-                    Sessions Disabled
-                  </span>
-                )}
-              </div>
-
-              {/* Upcoming events list */}
-              <div>
-                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2 px-1">Upcoming Events</p>
-                <div className="space-y-2 max-h-[180px] overflow-y-auto custom-scrollbar">
-                  {calendarMonitor?.upcomingEvents?.map((event, i) => (
-                    <div key={i} className="flex justify-between items-center p-2.5 hover:bg-slate-50 rounded-xl transition text-xs border border-transparent hover:border-slate-100">
-                      <span className="font-extrabold text-indigo-650 bg-indigo-50/80 px-2 py-1 rounded-lg">
-                        {new Date(event.date).toLocaleDateString('default', { month: 'short', day: 'numeric' })}
-                      </span>
-                      <span className="font-semibold text-slate-700 flex-1 ml-3 truncate">{event.description}</span>
-                      <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">{event.type}</span>
-                    </div>
-                  ))}
-                  {(!calendarMonitor?.upcomingEvents || calendarMonitor.upcomingEvents.length === 0) && (
-                    <p className="text-center text-xs text-slate-400 italic py-4">No upcoming events listed.</p>
-                  )}
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
+      </div>
 
       {/* Section 4 & Section 5: Attendance Session Engine & Defaulter Monitoring */}
       {!departmentOnly ? (
