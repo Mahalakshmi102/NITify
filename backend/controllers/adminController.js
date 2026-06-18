@@ -189,13 +189,13 @@ exports.getUsers = async (req, res) => {
     const isStaff = req.user.role === 'Faculty' || req.user.role === 'Class Advisor';
     if (isStaff) {
       const facultyUser = await User.findById(req.user.id);
-      query.role = 'Student';
+      query.role = req.query.role || 'Student';
       query.department = req.user.department || (facultyUser && facultyUser.department) || 'General';
       
       const { year, semester, section } = req.query;
-      if (year) query.year = year;
-      if (semester) query.semester = semester;
-      if (section) query.section = section;
+      if (year && query.role === 'Student') query.year = year;
+      if (semester && query.role === 'Student') query.semester = semester;
+      if (section && query.role === 'Student') query.section = section;
     }
 
     const { role, department, year, semester, section } = req.query;

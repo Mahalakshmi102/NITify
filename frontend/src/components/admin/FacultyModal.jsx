@@ -210,13 +210,19 @@ export default function FacultyModal({ isOpen, onClose, facultyToEdit, onSuccess
                 <div>
                   <label className="block text-xs font-extrabold text-slate-500 uppercase tracking-wide mb-1.5">Department</label>
                   <select required name="department" value={formData.department} onChange={handleChange} disabled={departmentOnly} className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none text-sm font-semibold text-slate-700 disabled:opacity-75">
-                    <option value="">Select Dept</option>
-                    <option value="CSE">CSE</option>
-                    <option value="ECE">ECE</option>
-                    <option value="IT">IT</option>
-                    <option value="EEE">EEE</option>
-                    <option value="MECH">MECH</option>
-                    <option value="CIVIL">CIVIL</option>
+                    {facultyToEdit && formData.department ? (
+                      <option value={formData.department}>{formData.department}</option>
+                    ) : (
+                      <>
+                        <option value="">Select Dept</option>
+                        <option value="CSE">CSE</option>
+                        <option value="ECE">ECE</option>
+                        <option value="IT">IT</option>
+                        <option value="EEE">EEE</option>
+                        <option value="MECH">MECH</option>
+                        <option value="CIVIL">CIVIL</option>
+                      </>
+                    )}
                   </select>
                 </div>
                 <div>
