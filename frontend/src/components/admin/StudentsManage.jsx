@@ -4,18 +4,16 @@ import { apiUrl, withAuthHeader } from '../../api/http';
 import { 
   Search, Download, MoreVertical, RotateCcw, 
   UserSquare2, CheckCircle2, FileText, FileSpreadsheet, Layers, Eye,
-  CheckSquare, Users
+  Users
 } from 'lucide-react';
 import BulkUpload from './BulkUpload';
 import StudentModal from './StudentModal';
 import StudentDetailsView from './StudentDetailsView';
-import AttendanceMonitoring from './AttendanceMonitoring';
 import { useAuth } from '../../context/AuthContext';
 import { updateUser, bulkDeleteUsers } from '../../api/adminApi';
 
 export default function StudentsManage({ departmentOnly, isReadOnly = false }) {
   const { user } = useAuth();
-  const [activeMainTab, setActiveMainTab] = useState('directory'); // 'directory' | 'attendance'
   const [students, setStudents] = useState([]);
   const [filteredStudents, setFilteredStudents] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -295,41 +293,6 @@ export default function StudentsManage({ departmentOnly, isReadOnly = false }) {
 
   return (
     <div className="space-y-6 pb-10">
-
-      {/* Top-level Tab Switcher */}
-      <div className="flex items-center gap-2 bg-white p-1.5 rounded-2xl border border-slate-100 shadow-sm w-fit">
-        <button
-          onClick={() => setActiveMainTab('directory')}
-          className={`flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-bold transition-all duration-200 ${
-            activeMainTab === 'directory'
-              ? 'bg-indigo-600 text-white shadow-md'
-              : 'text-slate-500 hover:bg-slate-50 hover:text-slate-700'
-          }`}
-        >
-          <Users className="w-4 h-4" />
-          Student Directory
-        </button>
-        <button
-          onClick={() => setActiveMainTab('attendance')}
-          className={`flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-bold transition-all duration-200 ${
-            activeMainTab === 'attendance'
-              ? 'bg-indigo-600 text-white shadow-md'
-              : 'text-slate-500 hover:bg-slate-50 hover:text-slate-700'
-          }`}
-        >
-          <CheckSquare className="w-4 h-4" />
-          Attendance Management
-        </button>
-      </div>
-
-      {/* Attendance Management Tab */}
-      {activeMainTab === 'attendance' && (
-        <AttendanceMonitoring />
-      )}
-
-      {/* Student Directory Tab */}
-      {activeMainTab === 'directory' && (
-      <>
       {/* Header section with Add and Bulk Upload */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-2">
         <div>
@@ -801,7 +764,7 @@ export default function StudentsManage({ departmentOnly, isReadOnly = false }) {
           </div>
         )}
       </div>
-      </> )} {/* end directory tab */}
+      {/* end directory tab */}
 
       <StudentModal 
         isOpen={isModalOpen}
